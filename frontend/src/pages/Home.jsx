@@ -272,10 +272,6 @@ const Home = () => {
                   <div className="w-8 h-8 bg-slate-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <BarChart3 className="w-4 h-4 text-slate-400" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Custom Reports</h4>
-                    <p className="text-gray-300">Generate detailed reports for any time period with exportable data.</p>
-                  </div>
                 </div>
               </div>
             </div>

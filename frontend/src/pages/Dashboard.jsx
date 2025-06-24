@@ -35,7 +35,8 @@ function Dashboard() {
         date: '',
         expense: '',
         place:'',
-        note:''
+        note:'',
+        category:''
     })
 
     const [isadd, setisadd] = useState(false);
@@ -449,6 +450,25 @@ function Dashboard() {
                                     }}
                                     className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                                 />
+
+                                <select
+                                    name="category"
+                                    value={newexpense.category}
+                                    onChange={(e) => {
+                                        setnewexpense((prev) => ({
+                                            ...prev,
+                                            category: e.target.value,
+                                        }));
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                >
+                                    <option value="">Select Category</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Other">Other</option>
+                                </select>
                                 <div className="flex justify-end pt-2">
                                     <button
                                     type="submit"
