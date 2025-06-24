@@ -52,7 +52,22 @@ function Dashboard() {
     ];
 
     const handleItemClick = (id)=>{
+        
         setActiveItem(id);
+    }
+
+    const expenseadd = (e)=>{
+        e.preventDefault();
+        setexpenses(prev => [...prev, newexpense])
+        setnewexpense({
+            name:'',
+            date:'',
+            expense: '',
+            place:'',
+            note:''
+        })
+        setisadd(prev => !prev);
+
     }
      useEffect(()=>{
         const checklogin = async ()=>{
@@ -78,7 +93,7 @@ function Dashboard() {
         return (
             <>
                 <div className="bg-gray-950 p-6 w-full">
-                    {isadd===false && (
+                    {!isadd && (
                         <>
                             <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
                             <div className="flex flex-wrap gap-3">
@@ -94,31 +109,97 @@ function Dashboard() {
                                 Set Budget
                             </button>
                             </div>
+                            <div className="mt-6 space-y-4">
+                            {expenses.map((ex, index) => (
+                                <div
+                                key={index}
+                                className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-sm text-white flex items-center justify-between hover:bg-gray-700 transition duration-200"
+                                >
+                                <div>
+                                    <h3 className="text-lg font-semibold">{ex.name}</h3>
+                                    <p className="text-sm text-gray-400">{ex.date}</p>
+                                </div>
+                                <div className="text-cyan-400 font-medium">
+                                    ₹{ex.expense}
+                                </div>
+                                </div>
+                            ))}
+                            </div>
                         </>
                     )}
 
-                    {isadd===true && (
+                    {isadd && (
                         <>
-                            <div className = 'flex items-center justify-center'>
-                                <form>
-                                    <input type = 'text' placeholder = 'name..' on name = 'name' onChange = {(e)=>{
-                                        setnewexpense(prev=>({
+                            <div className="flex items-center justify-center">
+                                <form className="bg-gray-900 p-6 rounded-xl shadow-lg w-full max-w-md space-y-4" onSubmit = {expenseadd}>
+                                <input
+                                    type="text"
+                                    placeholder="Expense Name"
+                                    value={newexpense.name}
+                                    onChange = {(e)=>{
+                                        setnewexpense(prev => ({
                                             ...prev,
                                             name: e.target.value,
                                         }))
-                                    }} />
-                                    <input type = 'text' placeholder = 'date..' on name = 'date' onChange = {(e)=>{
-                                        setnewexpense(prev=>({
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Date (YYYY-MM-DD)"
+                                    value={newexpense.date}
+                                    onChange = {(e)=>{
+                                        setnewexpense(prev => ({
                                             ...prev,
                                             date: e.target.value,
                                         }))
-                                    }} />
-                                    <input type = 'text' placeholder = 'name..' on name = 'name' onChange = {(e)=>{
-                                        setnewexpense(prev=>({
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Amount"
+                                    value={newexpense.expense}
+                                    onChange = {(e)=>{
+                                        setnewexpense(prev => ({
                                             ...prev,
-                                            name: e.target.value,
+                                            expense: e.target.value,
                                         }))
-                                    }} />
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Place"
+                                    value={newexpense.place}
+                                    onChange = {(e)=>{
+                                        setnewexpense(prev => ({
+                                            ...prev,
+                                            place: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                 <input
+                                    type="text"
+                                    placeholder="Notes.."
+                                    value={newexpense.note}
+                                    onChange = {(e)=>{
+                                        setnewexpense(prev => ({
+                                            ...prev,
+                                            note: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <div className="flex justify-end pt-2">
+                                    <button
+                                    type="submit"
+                                    className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                                    >
+                                    Save Expense
+                                    </button>
+                                </div>
                                 </form>
                             </div>
                         </>
