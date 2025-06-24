@@ -34,8 +34,11 @@ function Dashboard() {
         date: '',
         expense: '',
         place:'',
-
+        note:''
     })
+
+    const [isadd, setisadd] = useState(false);
+
     
     const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -75,19 +78,52 @@ function Dashboard() {
         return (
             <>
                 <div className="bg-gray-950 p-6 w-full">
-        <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
-          <button className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200">
-            Add Expense
-          </button>
-          <button className="cursor-pointer bg-gray-800 border border-gray-700 text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-700 hover:text-white transition-all duration-200">
-            View Reports
-          </button>
-          <button className="cursoro-pointer bg-gray-800 border border-gray-700 text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-700 hover:text-white transition-all duration-200">
-            Set Budget
-          </button>
-        </div>
-      </div>
+                    {isadd===false && (
+                        <>
+                            <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
+                            <div className="flex flex-wrap gap-3">
+                            <button onClick = {()=>{
+                                setisadd(prev => !prev);
+                            }} className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200">
+                                Add Expense
+                            </button>
+                            <button className="cursor-pointer bg-gray-800 border border-gray-700 text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-700 hover:text-white transition-all duration-200">
+                                View Reports
+                            </button>
+                            <button className="cursoro-pointer bg-gray-800 border border-gray-700 text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-700 hover:text-white transition-all duration-200">
+                                Set Budget
+                            </button>
+                            </div>
+                        </>
+                    )}
+
+                    {isadd===true && (
+                        <>
+                            <div className = 'flex items-center justify-center'>
+                                <form>
+                                    <input type = 'text' placeholder = 'name..' on name = 'name' onChange = {(e)=>{
+                                        setnewexpense(prev=>({
+                                            ...prev,
+                                            name: e.target.value,
+                                        }))
+                                    }} />
+                                    <input type = 'text' placeholder = 'date..' on name = 'date' onChange = {(e)=>{
+                                        setnewexpense(prev=>({
+                                            ...prev,
+                                            date: e.target.value,
+                                        }))
+                                    }} />
+                                    <input type = 'text' placeholder = 'name..' on name = 'name' onChange = {(e)=>{
+                                        setnewexpense(prev=>({
+                                            ...prev,
+                                            name: e.target.value,
+                                        }))
+                                    }} />
+                                </form>
+                            </div>
+                        </>
+                    )}
+                </div>
             </>
         )
      }
