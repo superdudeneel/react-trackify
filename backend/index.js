@@ -11,6 +11,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const User = require('./models/userschema.js');
+const Expense = require('./models/expenseschema.js')
 
 
 const mongo_url = process.env.MONGO_URI;
@@ -100,6 +101,28 @@ app.post('/api/login', async(req, res)=>{
     })
 
     return res.json({success: true, message: 'Logged In Successfuly'});
+})
+
+app.post('/api/addexpense', async (req, res)=>{
+    const {name, date, expense, place, note, category} = req.body;
+    const user = await User.findById(req.session.user.id);
+    await Expense.create({
+        userID: user._id,
+        name:name,
+        expense: expense,
+        date: date,
+        place: place,
+        note: note,
+        category: category,
+    })
+    return res.json({success: true, message: 'Expense Added'});
+
+})
+
+app.get('/api/expenses', async (req, res)=>{
+    const expenses = await Expense.find({userID: req.session.user.id});
+    return res.json({success: true, expenses: expenses});
+
 })
 
 app.get('/api/logout', (req, res)=>{

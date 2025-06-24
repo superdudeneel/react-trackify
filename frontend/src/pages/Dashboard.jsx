@@ -4,6 +4,7 @@ import {useState, useEffect} from 'react';
 import Swal from 'sweetalert2';
 import { 
   LayoutDashboard, 
+  IndianRupee ,
   Receipt, 
   TrendingUp, 
   Settings, 
@@ -56,9 +57,46 @@ function Dashboard() {
         setActiveItem(id);
     }
 
-    const expenseadd = (e)=>{
+    const getexpenses = async ()=>{
+      const response = await fetch('http://localhost:7000/api/expenses', {
+        method: 'GET',
+        credentials: 'include',
+      })
+
+      const result = await response.json();
+      if(result.success){
+        setexpenses(prev=> [...prev, ...result.expenses])
+      }
+
+    }
+
+    const expenseadd = async (e)=>{
         e.preventDefault();
-        setexpenses(prev => [...prev, newexpense])
+        const response = await fetch('http://localhost:7000/api/addexpense', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newexpense)
+
+        })
+        const result =await response.json();
+        if(result.success){
+          setexpenses(prev => [...prev, newexpense])
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            background: '#1e293b',
+            color: 'white',
+            showConfirmButton: true,
+            timer: 1200,
+            confirmButtonText: 'Ok',
+            showCloseButton: true,
+          })
+        }
+        
         setnewexpense({
             name:'',
             date:'',
@@ -85,18 +123,19 @@ function Dashboard() {
             }
         }
         checklogin();
+        getexpenses();
 
      }, [])
 
 
-     const KPICards = () => {
+     const KPICards = (props) => {
   const kpiData = [
     {
       title: 'Total Expenses',
-      value: '$2,847.50',
+      value: `₹${props.totalexpenses}`,
       change: '+12.5%',
       changeType: 'increase',
-      icon: DollarSign,
+      icon: IndianRupee,
       color: 'from-red-500 to-red-600'
     },
     {
@@ -117,7 +156,7 @@ function Dashboard() {
     },
     {
       title: 'Transactions',
-      value: '127',
+      value: props.transactions,
       change: 'This month',
       changeType: 'neutral',
       icon: CreditCard,
@@ -205,6 +244,9 @@ function Dashboard() {
   );
 };
 
+    const totalexpenses = expenses.reduce((sum, w) => sum + parseInt(w.expense || 0), 0);
+    const transactions = expenses.length;
+
     if(isloggedin===false){
         return <div>Loading...</div>
     }
@@ -289,8 +331,8 @@ function Dashboard() {
               <User size={18} className="text-gray-300" />
             </div>
             <div>
-              <p className="text-white font-medium text-sm">John Doe</p>
-              <p className="text-gray-400 text-xs">john@example.com</p>
+              <p className="text-white font-medium text-sm">{user.username}</p>
+              <p className="text-gray-400 text-xs">{user.email}</p>
             </div>
           </div>
         </div>
@@ -302,7 +344,7 @@ function Dashboard() {
                 
                 {activeItem==='dashboard' && (
                     <>
-                        <KPICards />
+                        <KPICards totalexpenses = {totalexpenses} transactions = {transactions} />
                     </>
                 )}
 
