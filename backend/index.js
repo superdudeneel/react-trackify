@@ -3,15 +3,26 @@ const path = require('path');
 const http = require('http');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const session = require('express-session');
 
+//.env files
 const dotenv = require('dotenv');
 dotenv.config();
 
+//nodemailer initialization
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
-
+//models
 const User = require('./models/userschema.js');
 const Expense = require('./models/expenseschema.js')
 
@@ -29,7 +40,7 @@ mongoose
 const app = express();
 const port = process.env.PORT;
 
-
+//middlewares
 app.use(cors({
     origin: process.env.FRONT_END_URI,
     credentials: true
@@ -46,6 +57,8 @@ app.use(session({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+//routes 
 app.get('/', (req, res)=>{
     res.send('hello world');
 })
@@ -158,6 +171,87 @@ app.get('/api/logout', (req, res)=>{
         res.clearCookie('sessionid');
         return res.json({success: true, message: 'Logout successful', redirect: '/login'});
     });
+})
+
+app.post('/api/forgotpass', async (req, res)=>{
+    const {email} = req.body;
+    const user = await User.findOne({email:email});
+
+    if(!email){
+        return res.json({success: false, message: 'Email field required'});
+    }
+    if(!user){
+        return res.json({success: false, message: 'USER NOT FOUND'});
+
+    }
+
+    const resettoken = crypto.randomBytes(32).toString('hex');
+    user.resettoken = resettoken;
+    user.resettokenexpiration = Date.now() + 3600000;
+    await user.save();
+
+    const resetLink  = `${process.env.FRONT_END_URI}/resetpass?token=${resettoken}`;
+
+
+    const info = await transporter.sendMail({
+      from: `"Neel from trackify" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: 'Password Reset',
+      html: `
+        <h2>Password Reset Requested</h2>
+        <p>Click the link below to reset your password. This link is valid for 1 hour.</p>
+        <a href="${resetLink}">${resetLink}</a>
+      `
+    });
+    return res.json({success: true, message: 'Email sent successfully'});
+})
+
+app.post('/api/updatepass', async (req, res)=>{
+    const {password, confirmpassword} = req.body;
+    const {token} = req.query;
+
+    if(!token){
+        return res.json({success: false, message: 'Token invalid or expired'});
+    }
+    const user = await User.findOne({
+        resettoken: token,
+        resettokenexpiration: { $gt: Date.now() }
+    })
+    if(!user){
+        return res.json({success: false, message: 'Token invalid or expired'});
+    }
+    if(!password||!confirmpassword){
+        return res.json({success: false, message: 'Both Fields are required'});
+
+    }
+    if(password!==confirmpassword){
+        return res.json({success: false, message: 'Both fields dont match'});
+
+    }
+    const hashedpassword = await bcrypt.hash(password, 10);
+    user.password = hashedpassword;
+    user.resettoken = undefined;
+    user.resettokenexpiration = undefined;
+    await user.save();
+    return res.json({success: true, message: 'Password updated successfully'});
+
+})
+
+app.get('/api/updatepass', async(req,res)=>{
+    const {token} = req.query;
+    if(!token){
+        return res.json({success: false})
+
+    }
+    const user = await User.findOne({
+        resettoken: token,
+        resettokenexpiration: { $gt: Date.now() }
+    })
+    if(!user){
+        return res.json({success: false, message: 'Token invalid or expired'});
+
+    }
+    return res.json({success: true});
 })
 
 app.get('/api/dashboard', async (req, res)=>{

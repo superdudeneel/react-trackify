@@ -21,6 +21,12 @@ const userschema = new mongoose.Schema({
     },
     budgetpermonth: {
         type: Number,
+    },
+    resettoken:{
+        type: String,
+    },
+    resettokenexpiration:{
+        type:Date,
     }
 
 })
