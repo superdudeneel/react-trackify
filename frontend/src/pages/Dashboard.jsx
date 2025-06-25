@@ -196,8 +196,8 @@ function Dashboard() {
     },
     {
       title: 'Monthly Budget',
-      value: '$4,000.00',
-      change: '71% used',
+      value:  `₹${props.budget}`,
+      change: `${props.percentage}%`,
       changeType: 'neutral',
       icon: Target,
       color: 'from-blue-500 to-blue-600'
@@ -302,6 +302,13 @@ function Dashboard() {
 
     const totalexpenses = expenses.reduce((sum, w) => sum + parseInt(w.expense || 0), 0);
     const transactions = expenses.length;
+    
+    const numericBudget = Number(budget);
+    
+    const percentage = numericBudget > 0
+      ? (totalexpenses / numericBudget) * 100
+      : 0;  
+    console.log(percentage);
 
     if(isloggedin===false){
         return <div>Loading...</div>
@@ -400,7 +407,7 @@ function Dashboard() {
                 
                 {activeItem==='dashboard' && (
                     <>
-                        <KPICards totalexpenses = {totalexpenses} transactions = {transactions} />
+                        <KPICards totalexpenses = {totalexpenses} transactions = {transactions} budget = {budget} percentage = {percentage}/>
                     </>
                 )}
 
