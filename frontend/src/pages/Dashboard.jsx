@@ -324,24 +324,24 @@ function Dashboard() {
         <div className="bg-gray-950 border border-gray-800 p-2 rounded-xl mt-8 overflow-x-auto max-w-4xl mx-auto">
           <h2 className="text-xl font-bold text-white mb-4">Expenses Per Day</h2>
           <ResponsiveContainer width='100%' height={300}>
-  <BarChart data={chartData}>
-    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-    <XAxis
-      dataKey="date"
-      stroke="#aaa"
-      interval={0}
-      angle={-45}
-      textAnchor="end"
-      height={60}
-    />
-    <YAxis stroke="#aaa" />
-    <Tooltip
-      contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }}
-      labelStyle={{ color: "#ccc" }}
-    />
-    <Bar dataKey="amount" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={30} />
-  </BarChart>
-</ResponsiveContainer>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <XAxis
+                dataKey="date"
+                stroke="#aaa"
+                interval={0}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis stroke="#aaa" />
+              <Tooltip
+                contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }}
+                labelStyle={{ color: "#ccc" }}
+              />
+              <Bar dataKey="amount" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={30} />
+            </BarChart>
+          </ResponsiveContainer>
 
         </div>
       );
