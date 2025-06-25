@@ -1,6 +1,8 @@
 import React from 'react'
 import {Link} from 'react-router-dom';
 import {useState, useEffect} from 'react';
+import { AgCharts } from "ag-charts-react";
+import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Swal from 'sweetalert2';
 import { 
   LayoutDashboard, 
@@ -45,7 +47,6 @@ function Dashboard() {
     })
 
     const [isadd, setisadd] = useState(false);
-
     
     const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -119,8 +120,10 @@ function Dashboard() {
 
       const result = await response.json();
       if(result.success){
-        setexpenses(prev=> [...prev, ...result.expenses])
+        setexpenses(result.expenses);
+        return result.expenses;
       }
+      return [];
 
     }
 
@@ -161,6 +164,11 @@ function Dashboard() {
         setisadd(false);
 
     }
+
+    const parseDate = (str) => {
+      const [day, month, year] = str.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    };
      useEffect(()=>{
         const checklogin = async ()=>{
             const response = await fetch('http://localhost:7000/api/dashboard', {
@@ -174,12 +182,14 @@ function Dashboard() {
             else{
                 setisloggedin(prev => !prev);
                 setuser(result.user);
+                populateuserinfo();
+        
+                const expensedata = await getexpenses();
             }
         }
         checklogin();
-        populateuserinfo();
+        
 
-        getexpenses();
 
      }, [])
 
@@ -187,24 +197,22 @@ function Dashboard() {
      const KPICards = (props) => {
   const kpiData = [
     {
-      title: 'Total Expenses',
+      title: 'Total Expenses Of All Time',
       value: `₹${props.totalexpenses}`,
-      change: '+12.5%',
-      changeType: 'increase',
       icon: IndianRupee,
       color: 'from-red-500 to-red-600'
     },
     {
       title: 'Monthly Budget',
       value:  `₹${props.budget}`,
-      change: `${props.percentage}%`,
+      change: `${props.percentage}% used`,
       changeType: 'neutral',
       icon: Target,
       color: 'from-blue-500 to-blue-600'
     },
     {
-      title: 'Savings',
-      value: '$1,152.50',
+      title: 'Total Expenses This month',
+      value: `₹${props.totalthismonth}`,
       change: '+8.2%',
       changeType: 'increase',
       icon: TrendingUp,
@@ -220,7 +228,7 @@ function Dashboard() {
     },
     {
       title: 'Average Daily',
-      value: '$91.85',
+      value: `₹${props.avgdailyexpense}`,
       change: '-3.1%',
       changeType: 'decrease',
       icon: Calendar,
@@ -301,14 +309,39 @@ function Dashboard() {
 };
 
     const totalexpenses = expenses.reduce((sum, w) => sum + parseInt(w.expense || 0), 0);
-    const transactions = expenses.length;
+
+    
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-indexed
+    const currentYear = now.getFullYear();
+
+    const totalThisMonth = expenses.reduce((sum, e) => {
+      const date = parseDate(e.date);
+      if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+        return sum + parseInt(e.expense || 0);
+      }
+      return sum;
+    }, 0);
+
+    const thisMonthExpenses = expenses.filter(e => {
+      const date = parseDate(e.date);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+    const transactions = thisMonthExpenses.length;
     
     const numericBudget = Number(budget);
     
     const percentage = numericBudget > 0
-      ? (totalexpenses / numericBudget) * 100
+      ? (totalThisMonth/ numericBudget) * 100
       : 0;  
-    console.log(percentage);
+
+    
+    const dates = expenses.map(e => parseDate(e.date));
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+    const dayDiff = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1;
+    const averageDailyExpense = dayDiff > 0 ? totalexpenses / dayDiff : 0;
+    
 
     if(isloggedin===false){
         return <div>Loading...</div>
@@ -407,7 +440,9 @@ function Dashboard() {
                 
                 {activeItem==='dashboard' && (
                     <>
-                        <KPICards totalexpenses = {totalexpenses} transactions = {transactions} budget = {budget} percentage = {percentage}/>
+                        <KPICards totalexpenses = {totalexpenses} transactions = {transactions} budget = {budget} percentage = {percentage} avgdailyexpense = {averageDailyExpense} totalthismonth = {totalThisMonth}/>
+                        
+                    
                     </>
                 )}
 
