@@ -308,6 +308,45 @@ function Dashboard() {
   );
 };
 
+    const Graphcharts = ()=>{
+      const groupedData = expenses.reduce((acc, curr) => {
+        const { date, expense } = curr;
+        const amount = parseInt(expense || 0);
+        acc[date] = (acc[date] || 0) + amount;
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(groupedData).map(([date, amount]) => ({
+        date,
+        amount,
+      }));
+      return (
+        <div className="bg-gray-950 border border-gray-800 p-2 rounded-xl mt-8 overflow-x-auto max-w-4xl mx-auto">
+          <h2 className="text-xl font-bold text-white mb-4">Expenses Per Day</h2>
+          <ResponsiveContainer width='100%' height={300}>
+  <BarChart data={chartData}>
+    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+    <XAxis
+      dataKey="date"
+      stroke="#aaa"
+      interval={0}
+      angle={-45}
+      textAnchor="end"
+      height={60}
+    />
+    <YAxis stroke="#aaa" />
+    <Tooltip
+      contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }}
+      labelStyle={{ color: "#ccc" }}
+    />
+    <Bar dataKey="amount" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={30} />
+  </BarChart>
+</ResponsiveContainer>
+
+        </div>
+      );
+    }
+
     const totalexpenses = expenses.reduce((sum, w) => sum + parseInt(w.expense || 0), 0);
 
     
@@ -347,10 +386,10 @@ function Dashboard() {
         return <div>Loading...</div>
     }
   return (
-    <div>
+    <div className = 'h-screen w-screen'>
         {isloggedin && (
             <>
-            <div className="flex h-screen">
+            <div className="flex h-screen w-screen overflow-hidden">
                 <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-gray-900 border-r border-gray-800 transition-all duration-300 ease-in-out flex flex-col h-screen`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
@@ -433,15 +472,14 @@ function Dashboard() {
           </div>
         </div>
       )}
-    
-      
-
-                </div>
+            </div>
                 
                 {activeItem==='dashboard' && (
                     <>
-                        <KPICards totalexpenses = {totalexpenses} transactions = {transactions} budget = {budget} percentage = {percentage} avgdailyexpense = {averageDailyExpense} totalthismonth = {totalThisMonth}/>
-                        
+                        <div className = 'flex-1 overflow-y-auto bg-gray-950 p-6'>
+                          <KPICards totalexpenses = {totalexpenses} transactions = {transactions} budget = {budget} percentage = {percentage} avgdailyexpense = {averageDailyExpense} totalthismonth = {totalThisMonth}/>
+                          <Graphcharts expenses = {expenses}/>
+                        </div>
                     
                     </>
                 )}
