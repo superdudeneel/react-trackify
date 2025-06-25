@@ -1,6 +1,15 @@
-# ExpenseFlow
+# Trackify
 
 A full-stack expense tracking application with a modern React + Vite frontend and a Node.js/Express + MongoDB backend.
+
+<p>
+    <img src="https://img.shields.io/badge/Frontend-React-blue" />
+    <img src="https://img.shields.io/badge/Backend-Node.js-green" />
+    <img src="https://img.shields.io/badge/Database-MongoDB-brightgreen" />
+    <img src="https://img.shields.io/badge/Auth-Cookies%20%2F%20Session-orange" />
+    <img src="https://img.shields.io/badge/Styling-TailwindCSS-06B6D4" />
+    <img src="https://img.shields.io/badge/Language-JavaScript-yellow" />
+</p>
 
 ## Features
 
