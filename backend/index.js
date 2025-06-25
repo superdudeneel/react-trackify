@@ -125,6 +125,27 @@ app.get('/api/expenses', async (req, res)=>{
 
 })
 
+app.put('/api/updateuser', async(req, res)=>{
+    const {firstname, lastname, budget} = req.body;
+    const user = await User.findById(req.session.user.id);
+    user.firstname = firstname;
+    user.lastname = lastname;
+    user.budgetpermonth = budget;
+    await user.save();
+    return res.json({success:true, message: 'details updated'});
+
+})
+
+app.get('/api/populate', async(req, res)=>{
+    const user = await User.findById(req.session.user.id);
+    const User1 = {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        budget: user.budgetpermonth,
+    }
+    return res.json({success: true, User: User1});
+})
+
 app.get('/api/logout', (req, res)=>{
     req.session.destroy((err) => {
         if (err) {

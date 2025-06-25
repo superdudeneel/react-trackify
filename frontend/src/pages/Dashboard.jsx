@@ -26,6 +26,11 @@ function Dashboard() {
     
     
     const [user, setuser] = useState({});
+    const [firstname, setfirstname] = useState('');
+    const [lastname, setlastname] = useState('');
+    const [budget, setbudget] = useState('');
+
+
     const [isloggedin, setisloggedin] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [activeItem, setActiveItem] = useState('dashboard');
@@ -56,6 +61,54 @@ function Dashboard() {
     const handleItemClick = (id)=>{
         
         setActiveItem(id);
+    }
+
+    const updateuserinfo = async (e)=>{
+      e.preventDefault();
+      const payload = {
+        firstname: firstname,
+        lastname: lastname,
+        budget: budget,
+      }
+      const response = await fetch('http://localhost:7000/api/updateuser', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+
+        body:JSON.stringify(payload)
+      })
+      const result = await response.json();
+      if(result.success){
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            background: '#1e293b',
+            color: 'white',
+            showConfirmButton: true,
+            timer: 1200,
+            confirmButtonText: 'Ok',
+            showCloseButton: true,
+          })
+      }
+    }
+    
+    const populateuserinfo = async ()=>{
+      const response = await fetch('http://localhost:7000/api/populate', {
+        method: 'GET',
+        credentials: 'include',
+      })
+      const result = await response.json();
+      console.log(result);
+
+      if(result.success){
+        setfirstname(result.User.firstname);
+        setlastname(result.User.lastname);
+        setbudget(result.User.budget);
+
+      }
     }
 
     const getexpenses = async ()=>{
@@ -124,6 +177,8 @@ function Dashboard() {
             }
         }
         checklogin();
+        populateuserinfo();
+
         getexpenses();
 
      }, [])
@@ -469,10 +524,19 @@ function Dashboard() {
                                     <option value="Entertainment">Entertainment</option>
                                     <option value="Other">Other</option>
                                 </select>
+                
                                 <div className="flex justify-end pt-2">
                                     <button
+                                    onClick = {()=>{
+                                      setisadd(false);
+                                    }}
+                                    className="cursor-pointer mr-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                                    >
+                                    Cancel
+                                    </button>
+                                    <button
                                     type="submit"
-                                    className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                                    className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
                                     >
                                     Save Expense
                                     </button>
@@ -483,6 +547,125 @@ function Dashboard() {
                     )}
                 </div>
                     </>
+                )}
+
+
+                {activeItem==='profile' && (
+                  <>
+                    <form onSubmit = {updateuserinfo} className="bg-gray-950 text-white p-8 w-full shadow-lg">
+                      <div className="space-y-12">
+                        <div className="border-b border-gray-700 pb-12">
+                          <h2 className="text-base font-semibold">Profile</h2>
+
+                          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                            <div className="sm:col-span-4">
+                              <label htmlFor="username" className="block text-sm font-medium">
+                                Username
+                              </label>
+                              <div className="mt-2">
+                                <div className="flex items-center rounded-md bg-gray-900 pl-3 outline outline-1 outline-gray-700 focus-within:outline-2 focus-within:outline-cyan-500">
+                                  <input
+                                    id="username"
+                                    name="username"
+                                    type="text"
+                                    value={user.username}
+                                    readOnly
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 bg-transparent text-white placeholder:text-gray-400 focus:outline-none sm:text-sm"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-b border-gray-700 pb-12">
+                          <h2 className="text-base font-semibold">Personal Information</h2>
+                          <p className="mt-1 text-sm text-gray-400">Use a permanent address where you can receive mail.</p>
+
+                          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                            <div className="sm:col-span-3">
+                              <label htmlFor="first-name" className="block text-sm font-medium">
+                                First name
+                              </label>
+                              <div className="mt-2">
+                                <input
+                                  id="first-name"
+                                  name="first-name"
+                                  type="text"
+                                  value={firstname}
+                                  onChange={(e) => setfirstname(e.target.value)}
+                                  className="block w-full rounded-md bg-gray-900 px-3 py-1.5 text-white outline outline-1 outline-gray-700 placeholder:text-gray-400 focus:outline-2 focus:outline-cyan-500 sm:text-sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="sm:col-span-3">
+                              <label htmlFor="last-name" className="block text-sm font-medium">
+                                Last name
+                              </label>
+                              <div className="mt-2">
+                                <input
+                                  id="last-name"
+                                  name="last-name"
+                                  type="text"
+                                  value={lastname}
+                                  onChange={(e) => setlastname(e.target.value)}
+                                  className="block w-full rounded-md bg-gray-900 px-3 py-1.5 text-white outline outline-1 outline-gray-700 placeholder:text-gray-400 focus:outline-2 focus:outline-cyan-500 sm:text-sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="sm:col-span-4">
+                              <label htmlFor="email" className="block text-sm font-medium">
+                                Email address
+                              </label>
+                              <div className="mt-2">
+                                <input
+                                  id="email"
+                                  name="email"
+                                  type="email"
+                                  value={user.email}
+                                  readOnly
+                                  className="block w-full rounded-md bg-gray-900 px-3 py-1.5 text-white outline outline-1 outline-gray-700 placeholder:text-gray-400 focus:outline-2 focus:outline-cyan-500 sm:text-sm"
+                                />
+                              </div>
+                            </div>
+
+                            
+
+                            <div className="sm:col-span-2">
+                              <label htmlFor="height" className="block text-sm font-medium">
+                                Set Budget Per Month
+                              </label>
+                              <div className="mt-2">
+                                <input
+                                  id="height"
+                                  name="height"
+                                  type="text"
+                                  value={budget}
+                                  onChange={(e) => setbudget(e.target.value)}
+                                  className="block w-full rounded-md bg-gray-900 px-3 py-1.5 text-white outline outline-1 outline-gray-700 placeholder:text-gray-400 focus:outline-2 focus:outline-cyan-500 sm:text-sm"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+  <div className="mt-6 flex items-center justify-end gap-x-6">
+    <button type="button" className="text-sm font-semibold text-white hover:text-gray-300">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      className="rounded-md bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
+    >
+      Save
+    </button>
+  </div>
+</form>
+
+                  </>
                 )}
             </div>
 
