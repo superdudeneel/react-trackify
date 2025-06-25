@@ -56,12 +56,35 @@ function Dashboard() {
      const bottomItems = [
         { id: 'profile', label: 'Profile', icon: User },
         { id: 'settings', label: 'Settings', icon: Settings },
-        { id: 'logout', label: 'Logout', icon: LogOut },
     ];
 
     const handleItemClick = (id)=>{
         
         setActiveItem(id);
+    }
+
+    const handlelogout = async ()=>{
+      const response = await fetch('http://localhost:7000/api/logout', {
+        method: 'GET',
+        credentials: 'include',
+
+      })
+      const result = await response.json();
+      if(result.success){
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            background: '#1e293b',
+            color: 'white',
+            showConfirmButton: true,
+            timer: 1200,
+            confirmButtonText: 'Ok',
+            showCloseButton: true,
+          }).then(()=>{
+            window.location.href = '/login';
+          })
+      }
     }
 
     const updateuserinfo = async (e)=>{
@@ -458,6 +481,12 @@ function Dashboard() {
             </button>
           );
         })}
+        
+        <button onClick = {handlelogout} className={`cursor-pointer w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group ${ 'text-gray-300 hover:text-white hover:bg-gray-800'
+              }`}>
+                <LogOut className="w-5 h-5 text-white" />
+                <span className = 'font-medium'>Log out</span>
+                </button>
       </div>
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-800">

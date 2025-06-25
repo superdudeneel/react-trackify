@@ -10,6 +10,8 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 dotenv.config();
 
+
+
 const User = require('./models/userschema.js');
 const Expense = require('./models/expenseschema.js')
 
@@ -166,6 +168,8 @@ app.get('/api/dashboard', async (req, res)=>{
     return res.json({success: true, user: req.session.user});
 
 })
+
+
 
 
 const myserver = http.createServer(app);
