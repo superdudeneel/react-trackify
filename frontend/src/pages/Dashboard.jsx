@@ -515,7 +515,7 @@ function Dashboard() {
 
                 {activeItem==='expenses' && (
                     <>
-                      <div className="bg-gray-950 p-6 w-full">
+                      <div className="bg-gray-950 p-6 w-full h-screen overflow-y-auto">
                     {!isadd && (
                         <>
                             <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
@@ -534,9 +534,10 @@ function Dashboard() {
                                 >
                                 <div>
                                     <h3 className="text-lg font-semibold">{ex.name}</h3>
-                                    <p className="text-sm text-gray-400">{ex.date}</p>
+                                    <p className="text-sm text-gray-300">{ex.date}</p>
+                                    <p>{ex.note}</p>
                                 </div>
-                                <div className="text-cyan-400 font-medium">
+                                <div className="text-red-700 font-medium">
                                     ₹{ex.expense}
                                 </div>
                                 </div>
@@ -661,7 +662,7 @@ function Dashboard() {
 
                 {activeItem==='profile' && (
                   <>
-                    <form onSubmit = {updateuserinfo} className="bg-gray-950 text-white p-8 w-full shadow-lg">
+                    <form onSubmit = {updateuserinfo} className="bg-gray-950 text-white p-8 w-full shadow-lg h-screen overflow-y-auto">
                       <div className="space-y-12">
                         <div className="border-b border-gray-700 pb-12">
                           <h2 className="text-base font-semibold">Profile</h2>
