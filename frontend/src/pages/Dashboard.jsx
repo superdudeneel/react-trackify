@@ -46,7 +46,20 @@ function Dashboard() {
         category:''
     })
 
+    const [incomes, setincomes] = useState([]);
+    const [newincome, setnewincome] = useState({
+      name: '',
+      date: '',
+      income: '',
+      place:'',
+      note:'',
+      category:''
+  })
+
     const [isadd, setisadd] = useState(false);
+    const [isaddexpense, setisaddexpense] = useState(false);
+    const [isaddincome, setisaddincome] = useState(false);
+
     
     const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -150,6 +163,17 @@ function Dashboard() {
 
     }
 
+    const getincomes = async ()=>{
+      const response = await fetch('http://localhost:7000/api/incomes', {
+        method: 'GET',
+        credentials: 'include',
+      })
+      const result = await response.json();
+      if(result.success){
+        setincomes(result.incomes);
+      }
+    }
+
     const expenseadd = async (e)=>{
         e.preventDefault();
         const response = await fetch('http://localhost:7000/api/addexpense', {
@@ -185,6 +209,48 @@ function Dashboard() {
             note:''
         })
         setisadd(false);
+        setisaddexpense(false);
+
+    }
+
+    const incomeadd = async (e)=>{
+      e.preventDefault();
+      const response = await fetch('http://localhost:7000/api/addincome', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(newincome)
+      })
+      const result = await response.json();
+      if(result.success){
+        setincomes(prev => [...prev, newincome]);
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            background: '#1e293b',
+            color: 'white',
+            showConfirmButton: true,
+            timer: 1200,
+            confirmButtonText: 'Ok',
+            showCloseButton: true,
+          })
+
+
+      }
+      setnewincome({
+         name: '',
+        date: '',
+        income: '',
+        place:'',
+        note:'',
+        category:''
+      })
+
+      setisadd(false);
+      setisaddincome(false);
 
     }
 
@@ -208,6 +274,8 @@ function Dashboard() {
                 populateuserinfo();
         
                 const expensedata = await getexpenses();
+                getincomes();
+
             }
         }
         checklogin();
@@ -518,15 +586,37 @@ function Dashboard() {
                       <div className="bg-gray-950 p-6 w-full h-screen overflow-y-auto">
                     {!isadd && (
                         <>
-                            <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
+                            <h2 className="text-xl font-semibold text-white mb-4">Quick Actions(red are the expenses and greens are the incomes)</h2>
                             <div className="flex flex-wrap gap-3">
                             <button onClick = {()=>{
+                                setisaddexpense(true);
                                 setisadd(true);
                             }} className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200">
                                 Add Expense
                             </button>
+                            <button onClick = {()=>{
+                                setisaddincome(true);
+                                setisadd(true);
+                            }} className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200">
+                                Add Income
+                            </button>
                             </div>
                             <div className="mt-6 space-y-4">
+                               {incomes.map((inc, index) => (
+                                <div
+                                key={index}
+                                className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-sm text-white flex items-center justify-between hover:bg-gray-700 transition duration-200"
+                                >
+                                <div>
+                                    <h3 className="text-lg font-semibold">{inc.name}</h3>
+                                    <p className="text-sm text-gray-300">{inc.date}</p>
+                                    <p>{inc.note}</p>
+                                </div>
+                                <div className="text-green-600 font-medium">
+                                    ₹{inc.income}
+                                </div>
+                                </div>
+                            ))}
                             {expenses.map((ex, index) => (
                                 <div
                                 key={index}
@@ -546,8 +636,8 @@ function Dashboard() {
                         </>
                     )}
 
-                    {isadd && (
-                        <div>
+                    {isadd && isaddexpense && (
+                      <div>
                             <div className="flex items-center justify-center mt-30">
                                 <form className="bg-gray-900 p-6 rounded-xl shadow-lg w-full max-w-md space-y-4" onSubmit = {expenseadd}>
                                 <input
@@ -639,6 +729,7 @@ function Dashboard() {
                                     <button
                                     onClick = {()=>{
                                       setisadd(false);
+                                      setisaddexpense(false)
                                     }}
                                     className="cursor-pointer mr-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
                                     >
@@ -653,7 +744,117 @@ function Dashboard() {
                                 </div>
                                 </form>
                             </div>
-                        </div>
+                      </div>
+                    )}
+                    {isadd && isaddincome && (
+                      <div>
+                            <div className="flex items-center justify-center mt-30">
+                                <form className="bg-gray-900 p-6 rounded-xl shadow-lg w-full max-w-md space-y-4" onSubmit = {incomeadd}>
+                                <input
+                                    type="text"
+                                    placeholder="Income Name"
+                                    name = 'name'
+                                    value={newincome.name}
+                                    onChange = {(e)=>{
+                                        setnewincome(prev => ({
+                                            ...prev,
+                                            name: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Date (YYYY-MM-DD)"
+                                    name = 'date'
+                                    value={newincome.date}
+                                    onChange = {(e)=>{
+                                        setnewincome(prev => ({
+                                            ...prev,
+                                            date: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Amount of income"
+                                    name = 'expense'
+                                    value={newincome.income}
+                                    onChange = {(e)=>{
+                                        setnewincome(prev => ({
+                                            ...prev,
+                                            income: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Place"
+                                    name = 'place'
+                                    value={newincome.place}
+                                    onChange = {(e)=>{
+                                        setnewincome(prev => ({
+                                            ...prev,
+                                            place: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+                                 <input
+                                    type="text"
+                                    placeholder="Notes.."
+                                    name = 'note'
+                                    value={newincome.note}
+                                    onChange = {(e)=>{
+                                        setnewincome(prev => ({
+                                            ...prev,
+                                            note: e.target.value,
+                                        }))
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                />
+
+                                <select
+                                    name="category"
+                                    value={newincome.category}
+                                    onChange={(e) => {
+                                        setnewincome((prev) => ({
+                                            ...prev,
+                                            category: e.target.value,
+                                        }));
+                                    }}
+                                    className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                >
+                                    <option value="">Select Category</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                
+                                <div className="flex justify-end pt-2">
+                                    <button
+                                    onClick = {()=>{
+                                      setisadd(false);
+                                      setisaddincome(false);
+                                    }}
+                                    className="cursor-pointer mr-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                                    >
+                                    Cancel
+                                    </button>
+                                    <button
+                                    type="submit"
+                                    className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                                    >
+                                    Save Income
+                                    </button>
+                                </div>
+                                </form>
+                            </div>
+                      </div>
                     )}
                 </div>
                     </>
