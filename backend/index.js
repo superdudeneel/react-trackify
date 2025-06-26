@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
 //models
 const User = require('./models/userschema.js');
 const Expense = require('./models/expenseschema.js')
-
+const Income = require('./models/incomeschema.js')
 
 const mongo_url = process.env.MONGO_URI;
 mongoose
@@ -134,9 +134,30 @@ app.post('/api/addexpense', async (req, res)=>{
 
 })
 
+app.post('/api/addincome', async (req, res)=>{
+    const {name, date, income, place, note, category} = req.body;
+    const user = await User.findById(req.session.user.id);
+    await Income.create({
+        userID: user._id,
+        name: name,
+        date: date,
+        income: income,
+        place: place,
+        note: note,
+        category: category,
+    })
+    return res.json({success: true, message: 'Income saved successfully'});
+})
+
 app.get('/api/expenses', async (req, res)=>{
     const expenses = await Expense.find({userID: req.session.user.id});
     return res.json({success: true, expenses: expenses});
+
+})
+
+app.get('/api/incomes', async (req, res)=>{
+    const incomes = await Income.find({userID: req.session.user.id});
+    return res.json({success: true, incomes: incomes});
 
 })
 
