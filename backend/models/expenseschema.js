@@ -9,7 +9,7 @@ const expenseschema = new mongoose.Schema({
         type: String,
     },
     expense:{
-        type: Number,
+        type: String,
 
     },
     date:{

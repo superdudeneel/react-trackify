@@ -8,10 +8,20 @@ const nodemailer = require('nodemailer');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const session = require('express-session');
+const multer = require('multer');
+const Tesseract = require('tesseract.js');
 
 //.env files
 const dotenv = require('dotenv');
 dotenv.config();
+
+//storage for receipt upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
+});
+
+const upload = multer({ storage });
 
 //nodemailer initialization
 const transporter = nodemailer.createTransport({
@@ -42,6 +52,8 @@ const app = express();
 const port = process.env.PORT;
 
 //middlewares
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors({
     origin: process.env.FRONT_END_URI,
     credentials: true
@@ -276,22 +288,74 @@ app.get('/api/updatepass', async(req,res)=>{
     return res.json({success: true});
 })
 
-app.post('/api/uploadreceipt', async (req , res)=>{
-    const {url, date} = req.body;
+app.post('/api/uploadreceipt', upload.single('receipt'), async (req , res)=>{
+    const { date} = req.body;
     const user = await User.findById(req.session.user.id);
 
-    if(!url || !date){
+    if(!req.file || !date){
         return res.json({success: false, message: 'Error uploading the reciept'});
 
     }
+
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    const localPath = req.file.path;
     await Receipt.create({
         userID: user._id,
-        url: url,
+        url: imageUrl,
         date:date,
+    })
+    const { data: { text } } = await Tesseract.recognize(localPath, 'eng', {
+        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,:-/₹$RsINR',
+        preserve_interword_spaces: 1,
+    });
+
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+    // Extract merchant name (first line)
+    const name = lines.length > 0 ? lines[0] : 'Unknown Merchant';
+
+    // Extract amount
+    const amountRegex = /(?:₹|Rs\.?|INR|\$)\s?([\d,]+(?:\.\d{1,2})?)/gi;
+    const matches = [...text.matchAll(amountRegex)];
+
+    let amount = null;
+    if (matches.length > 0) {
+    const values = matches.map(m => parseFloat(m[1].replace(/,/g, '')));
+    amount = Math.max(...values); // likely to be the total amount
+    } 
+
+    if (amount === null) {
+        const fallbackRegex = /\b([\d,]+(?:\.\d{1,2})?)\b/g;
+        const fallbackMatches = [...text.matchAll(fallbackRegex)];
+        if (fallbackMatches.length > 0) {
+            const values = fallbackMatches.map(m => parseFloat(m[1].replace(/,/g, '')));
+            amount = Math.max(...values); // still try to pick the total
+        }
+    }
+
+
+
+    // Extract date (dd-mm-yyyy or dd/mm/yyyy)
+    const dateRegex = /\b\d{2}[\/\-]\d{2}[\/\-]\d{4}\b/;
+    const dateMatch = text.match(dateRegex);
+    const date1= dateMatch ? dateMatch[0] : 'Unknown Date';
+
+    let category = 'Other';
+    if (/zomato|swiggy|pizza|restaurant|coffee|starbucks/i.test(text)) category = 'Food';
+    else if (/uber|ola|auto|taxi|petrol/i.test(text)) category = 'Transport';
+    else if (/electricity|gas|water|bill/i.test(text)) category = 'Utilities';
+    else if (/movie|netflix|bookmyshow/i.test(text)) category = 'Entertainment';
+    await Expense.create({
+        userID: user._id,
+        name: name,
+        expense: amount,
+        date: date1,
+        place: name,
+        note: text,
+        category: category,
     })
     return res.json({success: true, message: 'Uploaded with success'});
     
-
 })
 
 app.get('/api/dashboard', async (req, res)=>{

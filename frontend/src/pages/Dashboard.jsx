@@ -81,18 +81,14 @@ function Dashboard() {
 
     const receiptupload = async (e)=>{
       e.preventDefault();
-      const payload = {
-        url: URL.createObjectURL(selectedFile),
-        date: Date.now(),
-      }
+      const formData = new FormData();
+      formData.append('receipt', selectedFile); // actual file, not a URL
+      formData.append('date', new Date().toISOString());
       const response  =await fetch('http://localhost:7000/api/uploadreceipt', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        },
 
-        body:JSON.stringify(payload)
+        body:formData
       })
       const result = await response.json();
       if(result.success){
