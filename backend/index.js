@@ -26,6 +26,7 @@ const transporter = nodemailer.createTransport({
 const User = require('./models/userschema.js');
 const Expense = require('./models/expenseschema.js')
 const Income = require('./models/incomeschema.js')
+const Receipt = require('./models/receiptschema.js')
 
 const mongo_url = process.env.MONGO_URI;
 mongoose
@@ -273,6 +274,24 @@ app.get('/api/updatepass', async(req,res)=>{
 
     }
     return res.json({success: true});
+})
+
+app.post('/api/uploadreceipt', async (req , res)=>{
+    const {url, date} = req.body;
+    const user = await User.findById(req.session.user.id);
+
+    if(!url || !date){
+        return res.json({success: false, message: 'Error uploading the reciept'});
+
+    }
+    await Receipt.create({
+        userID: user._id,
+        url: url,
+        date:date,
+    })
+    return res.json({success: true, message: 'Uploaded with success'});
+    
+
 })
 
 app.get('/api/dashboard', async (req, res)=>{

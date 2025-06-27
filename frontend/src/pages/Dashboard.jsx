@@ -60,11 +60,14 @@ function Dashboard() {
     const [isaddexpense, setisaddexpense] = useState(false);
     const [isaddincome, setisaddincome] = useState(false);
 
+
+    const [selectedFile, setSelectedFile] = useState(null);
+
     
     const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'expenses', label: 'Expense Tracker', icon: Receipt },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'Receipt Upload', label: 'Receipt Upload', icon: TrendingUp },
     ];
      const bottomItems = [
         { id: 'profile', label: 'Profile', icon: User },
@@ -76,11 +79,43 @@ function Dashboard() {
         setActiveItem(id);
     }
 
+    const receiptupload = async (e)=>{
+      e.preventDefault();
+      const payload = {
+        url: URL.createObjectURL(selectedFile),
+        date: Date.now(),
+      }
+      const response  =await fetch('http://localhost:7000/api/uploadreceipt', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+
+        body:JSON.stringify(payload)
+      })
+      const result = await response.json();
+      if(result.success){
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            background: '#1e293b',
+            color: 'white',
+            showConfirmButton: true,
+            timer: 1200,
+            confirmButtonText: 'Ok',
+            showCloseButton: true,
+          })
+      }
+      setSelectedFile(null);
+    }
+
     const handlelogout = async ()=>{
       const response = await fetch('http://localhost:7000/api/logout', {
         method: 'GET',
         credentials: 'include',
-
+        
       })
       const result = await response.json();
       if(result.success){
@@ -978,7 +1013,56 @@ function Dashboard() {
 
                   </>
                 )}
-            </div>
+
+                {activeItem==='Receipt Upload' && (
+                   <div className="bg-gray-950 p-6 w-full h-screen overflow-y-auto">
+                    <h2 className="text-xl font-semibold text-white mb-4">Upload a Receipt</h2>
+
+                    <div className="flex items-center justify-center mt-10">
+                      <form onSubmit = {receiptupload} className="bg-gray-900 p-6 rounded-xl shadow-lg w-full max-w-md space-y-4">
+                        <div>
+                          <label className="block text-sm text-white mb-2">Receipt Image</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="w-full px-4 py-2 rounded-md bg-gray-800 text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-gradient-to-r file:from-blue-600 file:to-cyan-600 file:text-white file:cursor-pointer"
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm text-white mb-2">Preview (Optional)</label>
+                          {selectedFile && (
+                            <img
+                              src={URL.createObjectURL(selectedFile)}
+                              alt="Preview"
+                              className="rounded-md border border-gray-700 w-full max-h-64 object-contain"
+                            />
+                          )}
+                        </div>
+
+                        <div className="flex justify-end pt-2">
+                          <button
+                            type="button"
+                            onClick = {()=>{
+                              setSelectedFile(null);
+                            }}
+                            className="cursor-pointer mr-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200"
+                          >
+                            Upload Receipt
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                              )}
+                          </div>
 
 
 
