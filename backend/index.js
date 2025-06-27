@@ -325,13 +325,30 @@ app.post('/api/uploadreceipt', upload.single('receipt'), async (req , res)=>{
     } 
 
     if (amount === null) {
+    // Try to extract amount from "Total" line if available
+    const totalLine = lines.find(line => /total/i.test(line));
+    if (totalLine) {
+        const totalMatch = totalLine.match(/([\d,]+(?:\.\d{1,2})?)/);
+        if (totalMatch) {
+            amount = parseFloat(totalMatch[1].replace(/,/g, ''));
+        }
+    }
+
+    // As a last fallback, use the largest number but exclude big values (like pincodes)
+    if (amount === null) {
         const fallbackRegex = /\b([\d,]+(?:\.\d{1,2})?)\b/g;
         const fallbackMatches = [...text.matchAll(fallbackRegex)];
         if (fallbackMatches.length > 0) {
-            const values = fallbackMatches.map(m => parseFloat(m[1].replace(/,/g, '')));
-            amount = Math.max(...values); // still try to pick the total
+            const values = fallbackMatches
+                .map(m => parseFloat(m[1].replace(/,/g, '')))
+                .filter(v => v > 1 && v < 100000); // Filter unrealistic values like pincodes
+            if (values.length > 0) {
+                amount = Math.max(...values);
+            }
         }
     }
+}
+
 
 
 
@@ -339,6 +356,8 @@ app.post('/api/uploadreceipt', upload.single('receipt'), async (req , res)=>{
     const dateRegex = /\b\d{2}[\/\-]\d{2}[\/\-]\d{4}\b/;
     const dateMatch = text.match(dateRegex);
     const date1= dateMatch ? dateMatch[0] : 'Unknown Date';
+    const parts = date1.split("/"); // ['27', '06', '2025']
+    const formatted = `${parts[0]}-${parts[1]}-${parts[2]}`;
 
     let category = 'Other';
     if (/zomato|swiggy|pizza|restaurant|coffee|starbucks/i.test(text)) category = 'Food';
@@ -349,7 +368,7 @@ app.post('/api/uploadreceipt', upload.single('receipt'), async (req , res)=>{
         userID: user._id,
         name: name,
         expense: amount,
-        date: date1,
+        date: formatted,
         place: name,
         note: text,
         category: category,
