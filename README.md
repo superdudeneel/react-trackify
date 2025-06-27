@@ -76,8 +76,14 @@ multi-threading/
    MONGO_URI=your_mongodb_connection_string
    PORT=7000
    FRONT_END_URI=http://localhost:5173
+   SMTP_USER = <your email address>
+   SMTP_PASS = <your app password>
    ```
-4. Start the backend server:
+4. Add a `uploads/` folder:
+   ```
+   mkdir uploads
+   ```
+5. Start the backend server:
    ```sh
    npm start
    ```
