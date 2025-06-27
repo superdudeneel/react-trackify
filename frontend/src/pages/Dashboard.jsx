@@ -5,6 +5,7 @@ import { AgCharts } from "ag-charts-react";
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Swal from 'sweetalert2';
 import { 
+  Users,
   LayoutDashboard, 
   IndianRupee ,
   Receipt, 
@@ -68,6 +69,7 @@ function Dashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'expenses', label: 'Expense Tracker', icon: Receipt },
     { id: 'Receipt Upload', label: 'Receipt Upload', icon: TrendingUp },
+    {id: 'Friends', label: 'Friends', icon: Users}
     ];
      const bottomItems = [
         { id: 'profile', label: 'Profile', icon: User },
@@ -994,18 +996,18 @@ function Dashboard() {
                         </div>
                       </div>
 
-  <div className="mt-6 flex items-center justify-end gap-x-6">
-    <button type="button" className="text-sm font-semibold text-white hover:text-gray-300">
-      Cancel
-    </button>
-    <button
-      type="submit"
-      className="rounded-md bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
-    >
-      Save
-    </button>
-  </div>
-</form>
+                    <div className="mt-6 flex items-center justify-end gap-x-6">
+                      <button type="button" className="text-sm font-semibold text-white hover:text-gray-300">
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-md bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </form>
 
                   </>
                 )}

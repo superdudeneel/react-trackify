@@ -364,6 +364,7 @@ app.post('/api/uploadreceipt', upload.single('receipt'), async (req , res)=>{
     else if (/uber|ola|auto|taxi|petrol/i.test(text)) category = 'Transport';
     else if (/electricity|gas|water|bill/i.test(text)) category = 'Utilities';
     else if (/movie|netflix|bookmyshow/i.test(text)) category = 'Entertainment';
+    else if(/Reliance|fresh/i.test(text)) category = 'Shopping';
     await Expense.create({
         userID: user._id,
         name: name,
