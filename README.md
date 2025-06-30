@@ -24,7 +24,7 @@ A full-stack expense tracking application with a modern React + Vite frontend an
 ## Project Structure
 
 ```
-multi-threading/
+/
 │
 ├── backend/         # Node.js/Express API server
 │   ├── index.js
